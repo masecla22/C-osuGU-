@@ -47,6 +47,8 @@
             this.label14 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // label1
@@ -206,15 +208,16 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(7, 139);
+            this.label14.Location = new System.Drawing.Point(7, 215);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(646, 25);
             this.label14.TabIndex = 17;
             this.label14.Text = "Advanced Options (if you don\'t know what these are, just leave em alone)";
+            this.label14.Click += new System.EventHandler(this.label14_Click);
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(124, 187);
+            this.textBox2.Location = new System.Drawing.Point(124, 263);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(100, 20);
             this.textBox2.TabIndex = 18;
@@ -225,17 +228,38 @@
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(12, 188);
+            this.label15.Location = new System.Drawing.Point(12, 264);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(108, 17);
             this.label15.TabIndex = 19;
             this.label15.Text = "Ranks to go up:";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.checkBox1.Location = new System.Drawing.Point(15, 297);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(412, 21);
+            this.checkBox1.TabIndex = 20;
+            this.checkBox1.Text = "Autodownload (in programs location) [WORK IN PROGRESS]";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(12, 189);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(630, 23);
+            this.progressBar1.TabIndex = 21;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(665, 500);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.label14);
@@ -283,6 +307,8 @@
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 

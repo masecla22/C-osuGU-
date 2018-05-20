@@ -8,10 +8,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web.Script.Serialization;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-
+using System.Threading;
 
 
 
@@ -22,7 +20,14 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+
+
+        WebClient webss = new WebClient();
         public string JUSTLINK;
+        public const string KEY = "";
+
+
+
         public string doGET(string URL)
         {
             string html = string.Empty;
@@ -34,7 +39,6 @@ namespace WindowsFormsApp1
             using (StreamReader reader = new StreamReader(stream)) { html = reader.ReadToEnd(); }
             return html;
         }
-        public const string KEY = "";
         public Form1()
         {
             InitializeComponent();
@@ -54,38 +58,66 @@ namespace WindowsFormsApp1
         {
             if (!String.IsNullOrWhiteSpace(textBox1.Text))
             {
-
+                progressBar1.Show();
+                progressBar1.Minimum = 1;
+                progressBar1.Maximum = 20;
+                progressBar1.Value = 1;
+                progressBar1.Step = 1;
                 string html = string.Empty;
-                string user = textBox1.Text;
-                string url = @"https://osu.ppy.sh/api/get_user?k=" + KEY + "&u=" + user;
-                var JSONobj = new JavaScriptSerializer().Deserialize<List<osuUser.user>>(doGET(url));
-                label5.Text = JSONobj[0].user_id + "    Username: " + JSONobj[0].username;
-                label4.Text = JSONobj[0].pp_raw.ToString();
-                label9.Text = JSONobj[0].level;
-                label10.Text = JSONobj[0].pp_rank;
-                label12.Text = JSONobj[0].pp_country_rank + " (" + JSONobj[0].country + ")";
-                int howManyRanks;
-                Int32.TryParse(textBox2.Text, out howManyRanks);
 
+                string user = textBox1.Text;
+                progressBar1.PerformStep();
+                string url = @"https://osu.ppy.sh/api/get_user?k=" + KEY + "&u=" + user;
+                progressBar1.PerformStep();
+                var JSONobj = new JavaScriptSerializer().Deserialize<List<osuUser.user>>(doGET(url));
+                progressBar1.PerformStep();
+                label5.Text = JSONobj[0].user_id + "    Username: " + JSONobj[0].username;
+                progressBar1.PerformStep();
+                label4.Text = JSONobj[0].pp_raw.ToString();
+                progressBar1.PerformStep();
+                label9.Text = JSONobj[0].level;
+                progressBar1.PerformStep();
+                label10.Text = JSONobj[0].pp_rank;
+                progressBar1.PerformStep();
+                label12.Text = JSONobj[0].pp_country_rank + " (" + JSONobj[0].country + ")";
+                progressBar1.PerformStep();
+                int howManyRanks;
+                progressBar1.PerformStep();
+                Int32.TryParse(textBox2.Text, out howManyRanks);
+                progressBar1.PerformStep();
                 int outss;
                 Int32.TryParse(JSONobj[0].pp_country_rank, out outss);
                 string nextPlayersID = getIDbyPos(outss - howManyRanks, JSONobj[0].country);
                 string urls = @"https://osu.ppy.sh/api/get_user_best?k=" + KEY + "&u=" + nextPlayersID;
                 var datUser = new JavaScriptSerializer().Deserialize<List<osuUser.beatmap>>(doGET(urls));
                 string mapID = datUser[0].beatmap_id;
-
+                progressBar1.PerformStep();
 
 
                 string urlz = @"https://osu.ppy.sh/api/get_beatmaps?k=" + KEY + "&b=" + mapID;
                 var datss = new JavaScriptSerializer().Deserialize<List<osuUser.beatset>>(doGET(urlz));
 
+                progressBar1.PerformStep();
                 linkLabel1.Text = "This is what you should play: " + datss[0].title + "  [" + datss[0].version + "]";
                 JUSTLINK = "https://osu.ppy.sh/beatmapsets/" + datss[0].beatmapset_id;
-
+                progressBar1.PerformStep();
+                if (checkBox1.Checked)
+                {
+                    webss.DownloadFileCompleted += new AsyncCompletedEventHandler(isComplete);
+                    Uri theLink = new Uri(JUSTLINK + "/download");
+                    webss.DownloadDataAsync(theLink, "map.osz");
+                }
+                progressBar1.Value = progressBar1.Maximum;
+                Thread.Sleep(2000);
+                progressBar1.Hide();
 
             }
             //   string scorePage = doGET
 
+        }
+        public void isComplete(object sender, AsyncCompletedEventArgs e)
+        {
+            MessageBox.Show("hello");
         }
         private bool isNumber(char a)
         {
@@ -114,7 +146,7 @@ namespace WindowsFormsApp1
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            progressBar1.Hide();
         }
         public int getPage(int position)
         {
@@ -162,6 +194,34 @@ namespace WindowsFormsApp1
             int x; Int32.TryParse(textBox2.Text, out x);
             if (x > 3000)
                 textBox2.Text = 3000.ToString();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if(checkBox1.Checked)
+            {
+                string message = "This is a BETA feature! Are you sure you want to use it?";
+                string caption = "Warning!";
+                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                DialogResult result;
+                result = MessageBox.Show(this, message, caption, buttons,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
+                    MessageBoxOptions.RightAlign);
+                if (result == DialogResult.No)
+                    checkBox1.Checked = false;
+            }
+        }
+
+        private void label14_Click(object sender, EventArgs e)
+        {
+
+
+            using (var client = new WebClient())
+            {
+                client.DownloadFile("https://osu.ppy.sh/beatmapsets/104801/download", "map.osz");
+            }
+
+
         }
     }
 }
