@@ -34,7 +34,7 @@ namespace WindowsFormsApp1
             using (StreamReader reader = new StreamReader(stream)) { html = reader.ReadToEnd(); }
             return html;
         }
-        public const string KEY = "wednesdaymydudes";
+        public const string KEY = "";
         public Form1()
         {
             InitializeComponent();
@@ -54,6 +54,7 @@ namespace WindowsFormsApp1
         {
             if (!String.IsNullOrWhiteSpace(textBox1.Text))
             {
+
                 string html = string.Empty;
                 string user = textBox1.Text;
                 string url = @"https://osu.ppy.sh/api/get_user?k=" + KEY + "&u=" + user;
@@ -63,11 +64,12 @@ namespace WindowsFormsApp1
                 label9.Text = JSONobj[0].level;
                 label10.Text = JSONobj[0].pp_rank;
                 label12.Text = JSONobj[0].pp_country_rank + " (" + JSONobj[0].country + ")";
-
+                int howManyRanks;
+                Int32.TryParse(textBox2.Text, out howManyRanks);
 
                 int outss;
                 Int32.TryParse(JSONobj[0].pp_country_rank, out outss);
-                string nextPlayersID = getIDbyPos(outss - 4, JSONobj[0].country);
+                string nextPlayersID = getIDbyPos(outss - howManyRanks, JSONobj[0].country);
                 string urls = @"https://osu.ppy.sh/api/get_user_best?k=" + KEY + "&u=" + nextPlayersID;
                 var datUser = new JavaScriptSerializer().Deserialize<List<osuUser.beatmap>>(doGET(urls));
                 string mapID = datUser[0].beatmap_id;
@@ -150,6 +152,16 @@ namespace WindowsFormsApp1
         private void linkLabel1_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(JUSTLINK);
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            
+            if (String.IsNullOrEmpty(textBox2.Text))
+                textBox2.Text = "0";
+            int x; Int32.TryParse(textBox2.Text, out x);
+            if (x > 3000)
+                textBox2.Text = 3000.ToString();
         }
     }
 }
