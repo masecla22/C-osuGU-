@@ -14,34 +14,88 @@ using System.Threading;
 
 
 
-
-
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-
-
-        WebClient webss = new WebClient();
-        public string JUSTLINK;
-        public const string KEY = "";
-
-
-
-        public string doGET(string URL)
+        private FormWindowState m_WindowState = FormWindowState.Normal;
+        private Rectangle m_FormSizeAndLocation = Rectangle.Empty;
+        private void ChangeWindowState(FormWindowState p_NewState)
         {
-            string html = string.Empty;
-            string url = URL;
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.AutomaticDecompression = DecompressionMethods.GZip;
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            using (Stream stream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(stream)) { html = reader.ReadToEnd(); }
-            return html;
+            this.WindowState = FormWindowState.Normal;
+            switch (p_NewState)
+            {
+                case FormWindowState.Maximized:
+                    // if in normal mode we remind window size and location
+                    if (m_WindowState == FormWindowState.Normal)
+                    {
+                        m_FormSizeAndLocation.Location = this.Location;
+                        m_FormSizeAndLocation.Size = this.Size;
+                    }
+                    // make our form to be borderless in Maximized mode
+                    this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                    // calculate the window dimensions manually to prevent overlap the taskbar
+                    this.Size = SystemInformation.WorkingArea.Size;
+                    this.Location = SystemInformation.WorkingArea.Location;
+                    break;
+                case FormWindowState.Minimized:
+                    this.WindowState = FormWindowState.Minimized;
+                    break;
+                case FormWindowState.Normal:
+                    // make our form Sizeable by code
+                    this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+                    // Return to previous state values for window ocation & size
+                    this.Location = m_FormSizeAndLocation.Location;
+                    this.Size = m_FormSizeAndLocation.Size;
+                    break;
+            }
+            // to remind our last WindowState mode applied
+            m_WindowState = p_NewState;
+        }
+        public int contor = 1;
+        public void setActiveP(Panel which)
+        {
+            which.Show();
+            which.BackColor = Color.FromArgb(205, 0, 205);
+        }
+        public void setInactiveP(Panel which)
+        {
+            which.Hide();
+        }
+        private bool m_MousePressed = false;
+        private int m_oldX, m_oldY;
+        void panel3_MouseDown(object sender, MouseEventArgs e)
+        {
+            Point TS = this.PointToScreen(e.Location);
+            m_oldX = TS.X;
+            m_oldY = TS.Y;
+            m_MousePressed = true;
+        }
+        void panel3_MouseUp(object sender, MouseEventArgs e)
+        {
+            m_MousePressed = false;
+        }
+        void panel3_MouseMove(object sender, MouseEventArgs e)
+        {
+            // if not maximized we can move our form
+            if (m_MousePressed == true && m_WindowState != FormWindowState.Maximized)
+            {
+                Point TS = this.PointToScreen(e.Location);
+
+                this.Location = new Point(this.Location.X + (TS.X - m_oldX),
+                                          this.Location.Y + (TS.Y - m_oldY));
+                m_oldX = TS.X;
+                m_oldY = TS.Y;
+            }
         }
         public Form1()
         {
             InitializeComponent();
+            panel3.MouseDown += new MouseEventHandler(panel3_MouseDown);
+            panel3.MouseMove += new MouseEventHandler(panel3_MouseMove);
+            panel3.MouseUp += new MouseEventHandler(panel3_MouseUp);
+            setActiveP(panel1);
+            setInactiveP(panel11);
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -56,63 +110,7 @@ namespace WindowsFormsApp1
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrWhiteSpace(textBox1.Text))
-            {
-                progressBar1.Show();
-                progressBar1.Minimum = 1;
-                progressBar1.Maximum = 20;
-                progressBar1.Value = 1;
-                progressBar1.Step = 1;
-                string html = string.Empty;
 
-                string user = textBox1.Text;
-                progressBar1.PerformStep();
-                string url = @"https://osu.ppy.sh/api/get_user?k=" + KEY + "&u=" + user;
-                progressBar1.PerformStep();
-                var JSONobj = new JavaScriptSerializer().Deserialize<List<osuUser.user>>(doGET(url));
-                progressBar1.PerformStep();
-                label5.Text = JSONobj[0].user_id + "    Username: " + JSONobj[0].username;
-                progressBar1.PerformStep();
-                label4.Text = JSONobj[0].pp_raw.ToString();
-                progressBar1.PerformStep();
-                label9.Text = JSONobj[0].level;
-                progressBar1.PerformStep();
-                label10.Text = JSONobj[0].pp_rank;
-                progressBar1.PerformStep();
-                label12.Text = JSONobj[0].pp_country_rank + " (" + JSONobj[0].country + ")";
-                progressBar1.PerformStep();
-                int howManyRanks;
-                progressBar1.PerformStep();
-                Int32.TryParse(textBox2.Text, out howManyRanks);
-                progressBar1.PerformStep();
-                int outss;
-                Int32.TryParse(JSONobj[0].pp_country_rank, out outss);
-                string nextPlayersID = getIDbyPos(outss - howManyRanks, JSONobj[0].country);
-                string urls = @"https://osu.ppy.sh/api/get_user_best?k=" + KEY + "&u=" + nextPlayersID;
-                var datUser = new JavaScriptSerializer().Deserialize<List<osuUser.beatmap>>(doGET(urls));
-                string mapID = datUser[0].beatmap_id;
-                progressBar1.PerformStep();
-
-
-                string urlz = @"https://osu.ppy.sh/api/get_beatmaps?k=" + KEY + "&b=" + mapID;
-                var datss = new JavaScriptSerializer().Deserialize<List<osuUser.beatset>>(doGET(urlz));
-
-                progressBar1.PerformStep();
-                linkLabel1.Text = "This is what you should play: " + datss[0].title + "  [" + datss[0].version + "]";
-                JUSTLINK = "https://osu.ppy.sh/beatmapsets/" + datss[0].beatmapset_id;
-                progressBar1.PerformStep();
-                if (checkBox1.Checked)
-                {
-                    webss.DownloadFileCompleted += new AsyncCompletedEventHandler(isComplete);
-                    Uri theLink = new Uri(JUSTLINK + "/download");
-                    webss.DownloadDataAsync(theLink, "map.osz");
-                }
-                progressBar1.Value = progressBar1.Maximum;
-                Thread.Sleep(2000);
-                progressBar1.Hide();
-
-            }
-            //   string scorePage = doGET
 
         }
         public void isComplete(object sender, AsyncCompletedEventArgs e)
@@ -146,82 +144,166 @@ namespace WindowsFormsApp1
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            progressBar1.Hide();
-        }
-        public int getPage(int position)
-        {
-            position--;
-            return (position / 50) + 1;
-        }
-        public static string getBetween(string strSource, string strStart, string strEnd)
-        {
-            int Start, End;
-            if (strSource.Contains(strStart) && strSource.Contains(strEnd))
-            {
-                Start = strSource.IndexOf(strStart, 0) + strStart.Length;
-                End = strSource.IndexOf(strEnd, Start);
-                return strSource.Substring(Start, End - Start);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        private string getIDbyPos(int pos, string country)
-        {
-            string src = doGET("https://old.ppy.sh/p/pp/?c=" + country + "&m=0&s=3&o=1&f=&page=" + getPage(pos));
-            string findUser = getBetween(src, "<td><b>#" + pos + "</b></td>", "</tr>");
-            findUser = getBetween(findUser, "<td>", "</td>");
-            findUser = getBetween(findUser, "u/", "'");
-            return findUser;
+           
         }
 
-        private void label12_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void mainMenu_Click(object sender, EventArgs e)
+        {
+            setActiveP(panel1);
+            setInactiveP(panel7);
+            setInactiveP(panel11);
+        }
+
+        private void userControl11_Load(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
         }
 
-        private void linkLabel1_Click(object sender, EventArgs e)
+        private void label4_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(JUSTLINK);
+
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
+        private void label3_Click(object sender, EventArgs e)
         {
-            
-            if (String.IsNullOrEmpty(textBox2.Text))
-                textBox2.Text = "0";
-            int x; Int32.TryParse(textBox2.Text, out x);
-            if (x > 3000)
-                textBox2.Text = 3000.ToString();
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label14_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label12_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label15_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            if(checkBox1.Checked)
-            {
-                string message = "This is a BETA feature! Are you sure you want to use it?";
-                string caption = "Warning!";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                DialogResult result;
-                result = MessageBox.Show(this, message, caption, buttons,
-                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
-                    MessageBoxOptions.RightAlign);
-                if (result == DialogResult.No)
-                    checkBox1.Checked = false;
-            }
+
         }
 
-        private void label14_Click(object sender, EventArgs e)
+        private void label1_Click(object sender, EventArgs e)
         {
 
+        }
 
-            using (var client = new WebClient())
-            {
-                client.DownloadFile("https://osu.ppy.sh/beatmapsets/104801/download", "map.osz");
-            }
+        private void label16_Click(object sender, EventArgs e)
+        {
 
+        }
 
+        private void label11_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label10_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            setActiveP(panel11);
+            setInactiveP(panel1);
+            setInactiveP(panel7);
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            setActiveP(panel7);
+            setInactiveP(panel1);
+            setInactiveP(panel11);
+        }
+
+        private void button1_Click_2(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (contor % 2 == 1)
+                this.WindowState = FormWindowState.Maximized;
+            else
+                this.WindowState = FormWindowState.Normal;
+            contor++;
         }
     }
 }
