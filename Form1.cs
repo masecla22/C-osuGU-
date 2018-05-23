@@ -96,6 +96,9 @@ namespace WindowsFormsApp1
             panel3.MouseUp += new MouseEventHandler(panel3_MouseUp);
             setActiveP(panel1);
             setInactiveP(panel11);
+            userControl31.Visible = false;
+            userControl41.Visible = false;
+
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -157,6 +160,9 @@ namespace WindowsFormsApp1
             setActiveP(panel1);
             setInactiveP(panel7);
             setInactiveP(panel11);
+            userControl11.Visible = true;
+            userControl31.Visible = false;
+            userControl41.Visible = false;
         }
 
         private void userControl11_Load(object sender, EventArgs e)
@@ -284,17 +290,39 @@ namespace WindowsFormsApp1
             setActiveP(panel11);
             setInactiveP(panel1);
             setInactiveP(panel7);
+            userControl11.Visible = false;
+            userControl31.Visible = false;
+            userControl41.Visible = true;
         }
         private void button2_Click(object sender, EventArgs e)
         {
             setActiveP(panel7);
             setInactiveP(panel1);
             setInactiveP(panel11);
+            userControl11.Visible = false;
+            userControl31.Visible = true;
+            userControl41.Visible = false;
+
         }
 
         private void button1_Click_2(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://patreon.com/Quintickle");
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://twitter.com/Quintickle");
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.youtube.com/channel/UCfr2K-Dsz_lL_U0f010JWJA");
         }
 
         private void button5_Click(object sender, EventArgs e)

@@ -20,6 +20,7 @@ namespace WindowsFormsApp1
         WebClient webss = new WebClient();
         public string JUSTLINK;
         public const string KEY = "f1b362fdd7062aed3f8e5fd48a5316a49875b504";
+        private const string StrEnd = "\0";
 
         public UserControl1()
         {
@@ -104,6 +105,18 @@ namespace WindowsFormsApp1
         private void button2_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(JUSTLINK);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string a = path.Replace("Roaming",@"Local\osu!\osu!.super.cfg");
+            string line1 = File.ReadLines(a).First();
+            line1 += "END::";
+            line1=getBetween(line1,"for ","END");
+            textBox1.Text = line1;
+            Thread.Sleep(100);
+            mapFind_Click(sender, e);
         }
     }
 }
